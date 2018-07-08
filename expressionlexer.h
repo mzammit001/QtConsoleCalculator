@@ -3,6 +3,7 @@
 
 class ExpressionLexer
 {
+
 public:
     ExpressionLexer(const char *expr);
     ~ExpressionLexer();

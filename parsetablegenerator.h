@@ -1,11 +1,16 @@
-#ifndef PARSETABLEGENERATOR_H
-#define PARSETABLEGENERATOR_H
-
+#pragma once
+#include "common.h"
 
 class ParseTableGenerator
 {
+    void firstSet();
+    void followSet();
+    bool isValid();
+
 public:
-    ParseTableGenerator();
+    ParseTableGenerator(PairVector &grammar);
+    ~ParseTableGenerator();
+
+    bool getParseTable();
 };
 
-#endif // PARSETABLEGENERATOR_H

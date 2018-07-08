@@ -10,3 +10,5 @@
 #include <cmath>
 #include <cstring>
 #include <QString>
+
+typedef std::vector<std::pair<std::string, std::string>> PairVector;

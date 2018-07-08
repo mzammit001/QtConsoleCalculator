@@ -1,6 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
+#pragma once
+#include "textresource.h"
 #include <QMainWindow>
 
 class MainWindow : public QMainWindow
@@ -13,5 +12,3 @@ signals:
 
 public slots:
 };
-
-#endif // MAINWINDOW_H

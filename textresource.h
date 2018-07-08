@@ -1,4 +1,7 @@
-#ifndef TEXTRESOURCE_H
-#define TEXTRESOURCE_H
+#pragma once
 
-#endif // TEXTRESOURCE_H
+namespace TextResource {
+    namespace UIString {
+        static const char *WindowTitle = "Qt Console Calculator";
+    }
+}
