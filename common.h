@@ -9,3 +9,4 @@
 #include <stdexcept>
 #include <cmath>
 #include <cstring>
+#include <QString>

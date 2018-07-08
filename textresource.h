@@ -1,0 +1,4 @@
+#ifndef TEXTRESOURCE_H
+#define TEXTRESOURCE_H
+
+#endif // TEXTRESOURCE_H
