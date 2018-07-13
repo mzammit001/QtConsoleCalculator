@@ -12,6 +12,12 @@
 #include <cmath>
 #include <cstring>
 #include <QString>
+#include "util.h"
 
-using PairVector = std::vector<std::pair<std::string, std::string>>;
+static constexpr const char *TermSymbol = "$";
+static constexpr const char *NullSymbol = "epsilon";
 
+using StringVectorMap = std::map<std::string, std::vector<std::string>>;
+using StringSetMap = std::map<std::string, std::set<std::string>>;
+using StringVector = std::vector<std::string>;
+using StringPair = std::pair<std::string, std::string>;

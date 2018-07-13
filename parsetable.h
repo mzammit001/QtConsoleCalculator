@@ -3,16 +3,16 @@
 
 class TransformationTableEntry {
 public:
-    TransformationTableEntry(std::string& prod, std::vector<std::string>& first, std::vector<std::string>& follow);
+    TransformationTableEntry(StringPair& prod, StringVector& first, StringVector& follow);
     
-    const std::string &getProduction() const;
-    const std::vector<std::string> &getFirstSet() const;
-    const std::vector<std::string> &getFollowSet() const;
+    const StringPair &getProduction() const;
+    const StringVector &getFirstSet() const;
+    const StringVector &getFollowSet() const;
 
 private:
-    std::string m_prod;
-    std::vector<std::string> m_first;
-    std::vector<std::string> m_follow;
+    StringPair m_prod;
+    StringVector m_first;
+    StringVector m_follow;
 };
 
 /**
@@ -35,8 +35,10 @@ public:
     };
 
 public:
-    ParseTable(const std::vector<TransformationTableEntry> &tte);
+    ParseTable(std::string &start, const std::vector<TransformationTableEntry> &tte);
     ~ParseTable();
+
+    std::string getStartVar();
 
     KeyProxy operator[](const std::string &key) const;
     std::map<std::string, std::string> getTerminals(const std::string &key) const;
@@ -46,9 +48,11 @@ private:
     std::set<std::string> productionSet(const std::vector<TransformationTableEntry> &tte) const;
     void createTable(const std::vector<TransformationTableEntry> &tte);
 
+private:
+    std::string m_start;
     std::map<std::string, int> m_prodKeys;
     std::map<std::string, int> m_termKeys;
-    int m_numProd;
-    int m_numTerm;
+    size_t m_numProd;
+    size_t m_numTerm;
     std::string *m_table;
 };

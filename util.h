@@ -1,9 +1,10 @@
 #pragma once
-#include "common.h"
+#include <vector>
+#include <string>
 
 namespace Util {
     namespace String {
-        std::vector<std::string> split(const std::string &str, const char *delim) {
+        static std::vector<std::string> split(const std::string &str, const char *delim) {
             std::vector<std::string> tokens;
             size_t pos = 0, old_pos = 0;
 
@@ -19,7 +20,7 @@ namespace Util {
             return tokens;
         }
 
-        std::string strip(std::string &str, const char delim) {
+        static std::string strip(std::string &str, const char delim) {
             size_t start = 0, end = str.size() - 1;
 
             while (str[start] == delim || str[end] == delim) {
