@@ -3,7 +3,7 @@
 
 class TransformationTableEntry {
 public:
-    TransformationTableEntry(StringPair& prod, StringVector& first, StringVector& follow);
+    TransformationTableEntry(const StringPair & prod, const StringVector & first, const StringVector & follow);
     
     const StringPair &getProduction() const;
     const StringVector &getFirstSet() const;
@@ -31,7 +31,9 @@ public:
 
     public:
         KeyProxy(const ParseTable &pt, int prodIndex);
-        std::string operator[](const std::string &key) const;
+        KeyProxy(ParseTable &pt, int prodIndex);
+        const std::string& operator[](const std::string &key) const;
+        std::string& operator[](const std::string &key);
     };
 
 public:
@@ -40,8 +42,9 @@ public:
 
     std::string getStartVar();
 
-    KeyProxy operator[](const std::string &key) const;
-    std::map<std::string, std::string> getTerminals(const std::string &key) const;
+    const KeyProxy operator[](const std::string &key) const;
+    KeyProxy operator[](const std::string &key);
+    std::set<std::string> getTerminals(const std::string &key) const;
     
 private:
     std::set<std::string> terminalSet(const std::vector<TransformationTableEntry> &tte) const;

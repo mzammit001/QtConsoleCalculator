@@ -1,6 +1,7 @@
 #include "expressionlexer.h"
 
 ExpressionLexer::ExpressionLexer(const char *expr)
+    : m_expr(expr)
 {
 
 }

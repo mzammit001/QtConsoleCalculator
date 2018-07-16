@@ -2,10 +2,11 @@
 
 using namespace Util;
 
-Grammar::Grammar(std::string &start, StringVector& grammar)
+Grammar::Grammar(std::string start, StringVector grammar)
     : m_start(start), m_parseTable(nullptr)
 {
     makeSimpleGrammar(grammar);
+    generateParseTable();
 }
 
 Grammar::~Grammar()
@@ -20,12 +21,32 @@ const ParseTable & Grammar::getParseTable() const
 
 void Grammar::generateParseTable()
 {
+    StringSetMap firstSet = makeFirstSet(m_start);
+    StringSetMap followSet = makeFollowSet(m_start, firstSet);
+    std::vector<TransformationTableEntry> tt = makeTransformationTable(m_start, firstSet, followSet);
+
+    m_parseTable = new ParseTable(m_start, tt);
 }
 
-std::vector<TransformationTableEntry> Grammar::makeTransformationTable(StringSetMap & firstSet, StringSetMap & followSet)
+std::vector<TransformationTableEntry> Grammar::makeTransformationTable(std::string start, StringSetMap & firstSet, StringSetMap & followSet)
 {
     std::vector<TransformationTableEntry> vtte;
+    
+    for (const auto &entry : m_grammar) {
+        std::vector<std::string> symbols = String::split(entry.second, " ");
 
+        std::vector<std::string> first;
+        std::copy(firstSet[symbols[0]].begin(), firstSet[symbols[0]].end(), std::back_inserter(first));
+        
+        std::vector<std::string> follow;
+        
+        if (firstSet[symbols[0]].count(NullSymbol) || entry.first == start) {
+            std::copy(followSet[entry.first].begin(), followSet[entry.first].end(), std::back_inserter(follow));
+        }
+
+        vtte.push_back(TransformationTableEntry(entry, first, follow));
+    }
+    
     return vtte;
 }
 
@@ -67,7 +88,7 @@ void Grammar::makeFirstSetRecur(std::string var, StringSetMap & firstSet)
     for (auto it = range.first; it != range.second; ++it) {
         StringPair sp = *it;
         if (!firstSet.count(var))
-            firstSet[var] = {};
+            firstSet[var] = std::set<std::string>();
 
         StringVector prods = productionToSymbols(sp.second);
         for (const auto &p : prods) {
@@ -84,7 +105,7 @@ void Grammar::makeFirstSetRecur(std::string var, StringSetMap & firstSet)
         else {
             for (const auto &p : prods) {
                 // FIRST(X) = FIRST(X) U FIRST(Y1) U ... U FIRST(Yk)
-                firstSet[var].merge(firstSet[p]);
+                std::copy(firstSet[p].begin(), firstSet[p].end(), std::inserter(firstSet[var], firstSet[var].begin()));
                 // epsilon !E FIRST(Yk)
                 if (std::find(firstSet[p].begin(), firstSet[p].end(), NullSymbol) == firstSet[p].end()) {
                     epsilon_prev = false;
@@ -123,7 +144,9 @@ void Grammar::makeFollowSetRecur(std::string var, StringSetMap & firstSet, Strin
         // case: A -> aB
         if (idx == syms.size() - 1) {
             // FOLLOW(B) = FOLLOW(A) U FOLLOW(B)
-            followSet[var].merge(followSet[r.first]);
+            //std::set<std::string> tmp(followSet[r.first]);
+            std::copy(followSet[r.first].begin(), followSet[r.first].end(), std::inserter(followSet[var], followSet[var].begin()));
+            //followSet[var].merge(tmp);
         }
         // case: A -> aBb
         else {
@@ -134,11 +157,13 @@ void Grammar::makeFollowSetRecur(std::string var, StringSetMap & firstSet, Strin
                     firstMinusNull.insert(s);
             
             // FOLLOW(B) = FOLLOW(B) U FIRST(b) \ { epsilon }
-            followSet[var].merge(firstMinusNull);
+            std::copy(firstMinusNull.begin(), firstMinusNull.end(), std::inserter(followSet[var], followSet[var].begin()));
+            //followSet[var].merge(firstMinusNull);
             
             // FOLLOW(B) = FOLLOW(A) U FOLLOW(B)
             if (firstSet[syms[idx + 1]].count(NullSymbol)) {
-                followSet[var].merge(followSet[r.first]);
+                std::copy(followSet[r.first].begin(), followSet[r.first].end(), std::inserter(followSet[var], followSet[var].begin()));
+                //followSet[var].merge(followSet[r.first]);
             }
         }
 
@@ -150,10 +175,11 @@ void Grammar::makeVariables()
     std::set<std::string> vars;
 
     // find unique variables
-    for (const auto &pair : m_grammar)
+    for (const auto &pair : m_grammar) {
         vars.insert(pair.first);
+    }
 
-    std::copy(vars.begin(), vars.end(), m_variables.begin());
+    std::copy(vars.begin(), vars.end(), std::back_inserter(m_variables));
 }
 
 void Grammar::makeTerminals()
@@ -162,16 +188,20 @@ void Grammar::makeTerminals()
 
     // find unique variables
     for (const auto &pair : m_grammar) {
-        // if not a variable or null symbol (epsilon)
-        if (std::find(m_variables.begin(), m_variables.end(), pair.second) == m_variables.end() || pair.second == NullSymbol) {
-            terms.insert(pair.second);
+        std::vector<std::string> symbols = productionToSymbols(pair.second);
+        // go through all the symbols
+        for (const auto &sym : symbols) {
+            // if not a variable or null symbol (epsilon)
+            if (std::find(m_variables.begin(), m_variables.end(), sym) == m_variables.end() || sym == NullSymbol) {
+                terms.insert(sym);
+            }
         }
     }
 
-    std::copy(terms.begin(), terms.end(), m_terminals.begin());
+    std::copy(terms.begin(), terms.end(), std::back_inserter(m_terminals));
 }
 
-void Grammar::makeSimpleGrammar(StringVector &grammar)
+void Grammar::makeSimpleGrammar(const StringVector &grammar)
 {
     for (auto &s : grammar) {
         // split the rule into variable, production

@@ -16,6 +16,7 @@
 
 static constexpr const char *TermSymbol = "$";
 static constexpr const char *NullSymbol = "epsilon";
+static constexpr const char *StartSymbol = "START";
 
 using StringVectorMap = std::map<std::string, std::vector<std::string>>;
 using StringSetMap = std::map<std::string, std::set<std::string>>;

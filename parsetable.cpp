@@ -1,6 +1,6 @@
 #include "parsetable.h"
 
-TransformationTableEntry::TransformationTableEntry(StringPair & prod, StringVector & first, StringVector & follow)
+TransformationTableEntry::TransformationTableEntry(const StringPair & prod, const StringVector & first, const StringVector & follow)
     : m_prod(prod), m_first(first), m_follow(follow)
 {
 }
@@ -25,7 +25,21 @@ ParseTable::KeyProxy::KeyProxy(const ParseTable & pt, int prodIndex)
 {
 }
 
-std::string ParseTable::KeyProxy::operator[](const std::string & key) const
+ParseTable::KeyProxy::KeyProxy(ParseTable & pt, int prodIndex)
+    : m_pt(pt), m_prodIndex(prodIndex)
+{
+}
+
+const std::string& ParseTable::KeyProxy::operator[](const std::string & key) const
+{
+    if (!m_pt.m_termKeys.count(key))
+        throw std::out_of_range("Terminal does not exist");
+
+    size_t idx = (m_pt.m_termKeys.size() * m_prodIndex) + m_pt.m_termKeys.at(key);
+    return m_pt.m_table[idx];
+}
+
+std::string & ParseTable::KeyProxy::operator[](const std::string & key)
 {
     if (!m_pt.m_termKeys.count(key))
         throw std::out_of_range("Terminal does not exist");
@@ -44,7 +58,7 @@ ParseTable::ParseTable(std::string &start, const std::vector<TransformationTable
     auto terminals = terminalSet(tte);
     m_numProd = productions.size();
     m_numTerm = terminals.size();
-    m_table = new std::string[m_numProd * m_numTerm];
+    m_table = new std::string[m_numProd * m_numTerm]();
     
     // map all the variables
     int i = 0;
@@ -72,7 +86,7 @@ std::string ParseTable::getStartVar()
     return m_start;
 }
 
-ParseTable::KeyProxy ParseTable::operator[](const std::string & key) const
+const ParseTable::KeyProxy ParseTable::operator[](const std::string & key) const
 {
     if (!m_prodKeys.count(key))
         throw std::out_of_range("Production does not exist");
@@ -81,9 +95,30 @@ ParseTable::KeyProxy ParseTable::operator[](const std::string & key) const
     return ParseTable::KeyProxy(*this, m_prodKeys.at(key));
 }
 
-std::map<std::string, std::string> ParseTable::getTerminals(const std::string & key) const
+ParseTable::KeyProxy ParseTable::operator[](const std::string & key)
 {
-    return std::map<std::string, std::string>();
+    if (!m_prodKeys.count(key))
+        throw std::out_of_range("Production does not exist");
+
+
+    return ParseTable::KeyProxy(*this, m_prodKeys.at(key));
+}
+
+std::set<std::string> ParseTable::getTerminals(const std::string & key) const
+{
+    std::set<std::string> terms;
+    
+    for (auto it = m_termKeys.begin(); it != m_termKeys.end(); ++it) {
+        const std::pair<std::string, int> &entry = *it;
+
+        const ParseTable &pt = *this;
+        const std::string &value = pt[key][entry.first];
+        if (value.size() != 0) {
+            terms.insert(entry.first);
+        }
+    }
+
+    return terms;
 }
 
 std::set<std::string> ParseTable::terminalSet(const std::vector<TransformationTableEntry>& tte) const
@@ -127,6 +162,7 @@ std::set<std::string> ParseTable::productionSet(const std::vector<Transformation
 void ParseTable::createTable(const std::vector<TransformationTableEntry>& tte)
 {
     using namespace Util;
+    ParseTable &pt = *this;
 
     for (const auto &e : tte) {
         const auto &first = e.getFirstSet();
@@ -137,12 +173,14 @@ void ParseTable::createTable(const std::vector<TransformationTableEntry>& tte)
         // non-epsilon production
         if (prod.second != NullSymbol) {
             for (const auto &f : first) {
-                m_table[(m_prodKeys[prod.first] * m_termKeys.size()) + m_termKeys[f]] = prod.second;
+                pt[prod.first][f] = prod.second;
+                std::cout << "pt[" << prod.first << "][" << f << "]: " << pt[prod.first][f] << std::endl;
             }
         }
         else {
             for (const auto &f : follow) {
-                m_table[(m_prodKeys[prod.first] * m_termKeys.size()) + m_termKeys[f]] = prod.second;
+                pt[prod.first][f] = prod.second;
+                std::cout << "pt[" << prod.first << "][" << f << "]: " << pt[prod.first][f] <<std::endl;
             }
         }
     }

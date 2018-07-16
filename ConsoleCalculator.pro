@@ -1,8 +1,8 @@
 TEMPLATE = app
 
-QT += core gui widgets
+QT += core gui widgets concurrent
 
-CONFIG += console c++14
+CONFIG += console c++17
 CONFIG -= app_bundle
 
 SOURCES += \

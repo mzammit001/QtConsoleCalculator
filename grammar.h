@@ -13,7 +13,7 @@ private:
     
 private:
     void generateParseTable();
-    std::vector<TransformationTableEntry> makeTransformationTable(StringSetMap &firstSet, StringSetMap &followSet);
+    std::vector<TransformationTableEntry> makeTransformationTable(std::string start, StringSetMap &firstSet, StringSetMap &followSet);
 
     StringSetMap makeFirstSet(std::string start);
     StringSetMap makeFollowSet(std::string start, StringSetMap &firstSet);
@@ -22,12 +22,12 @@ private:
 
     void makeVariables();
     void makeTerminals();
-    void makeSimpleGrammar(StringVector &grammar);
+    void makeSimpleGrammar(const StringVector &grammar);
     StringVector productionToSymbols(std::string prod);
     std::vector<StringPair> findRulesWithSymbol(std::string symbol);
 
 public:
-    Grammar(std::string &start, StringVector &grammar);
+    Grammar(std::string start, StringVector grammar);
     ~Grammar();
 
     const ParseTable &getParseTable() const;

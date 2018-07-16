@@ -3,6 +3,8 @@
 
 class ExpressionLexer
 {
+private:
+    std::string m_expr;
 
 public:
     ExpressionLexer(const char *expr);
