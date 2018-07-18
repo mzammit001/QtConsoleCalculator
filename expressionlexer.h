@@ -1,14 +1,18 @@
-#pragma once
 #include "common.h"
+#include "textresource.h"
 
+#pragma once
 class ExpressionLexer
 {
 private:
     std::string m_expr;
+    std::vector<std::pair<std::string, std::string>> m_tokens;
 
 public:
     ExpressionLexer(const char *expr);
     ~ExpressionLexer();
 
-    std::vector<std::string> getTokens();
+    void tokenize();
+    const std::vector<std::pair<std::string, std::string>>& getTokens() const;
 };
+

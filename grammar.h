@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 #include "parsetable.h"
+#include "expressionlexer.h"
 
 class Grammar
 {
